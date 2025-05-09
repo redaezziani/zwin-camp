@@ -27,8 +27,8 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Zwin Camp')
     .setDescription(
-      'Api For Zwin Camp, The best place for finding the best camps in your city and fast planning',
-    )
+      'Api For Zwin Camp , The best place for finding the best camps in your city and fast planning',
+    ) 
     .setVersion('1.0')
     .addTag('camps')
     .build();
