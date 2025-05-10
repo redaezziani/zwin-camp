@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+model Park {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  city        String
+  latitude    Float
+  longitude   Float
+  mapUrl      String
+  campsites   CampSite[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model CampSite {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  city        String
+  latitude    Float
+  longitude   Float
+  mapUrl      String
+  park        Park      @relation(fields: [parkId], references: [id])
+  parkId      String
+  isAvailable Boolean   @default(true)
+  fireAllowed Boolean   @default(true)
+  createdBy   User      @relation("UserCreatedCampsites", fields: [createdById], references: [id])
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  favorites   Favorite[]
+}
+
+model User {
+  id                String     @id @default(cuid())
+  email             String     @unique
+  password          String
+  name              String?
+  role              Role       @default(USER)
+  isEmailVerified   Boolean    @default(false)
+  verificationToken Token[]
+  favorites         Favorite[]
+  campsites         CampSite[] @relation("UserCreatedCampsites")
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model Token {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  type      TokenType
+  expires   DateTime
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  createdAt DateTime  @default(now())
+
+  @@index([token])
+}
+
+model Favorite {
+  id         String    @id @default(cuid())
+  user       User      @relation(fields: [userId], references: [id])
+  userId     String
+  campsite   CampSite  @relation(fields: [campsiteId], references: [id])
+  campsiteId String
+  createdAt  DateTime  @default(now())
+
+  @@unique([userId, campsiteId])
+}
